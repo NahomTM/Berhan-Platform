@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  firstName   String
+  middleName  String?
+  lastName    String
+  gender      String
+  dateOfBirth DateTime
+  role        String
+  phoneNumber String
+  email       String  @unique
+  password    String
+  username    String  @unique
+  address     String
+  passChanged Boolean @default(false)
+  
+  // Relationships
+  documents Document[]
+  classes        Class[]             // One-to-many relationship from User to Class
+  instructorUploads InstructorUploads[] @relation("UserToInstructorUploads")
+  rooms          Room[]              // One-to-many relationship from User to Room
+  exams          Exam[]
+  results            Result[]
+  answers            Answer[]
+}
+
+model Exam {
+  id                Int        @id @default(autoincrement())
+  courseId          Int
+  course            Course     @relation(fields: [courseId], references: [id])
+  examCode          String     @unique
+  examName          String
+  duration          String
+  examDate          DateTime
+  numberOfQuestions Int
+  userId            Int
+  user              User       @relation(fields: [userId], references: [id])
+  questions         Question[]
+  results            Result[]
+}
+
+model Question {
+  id              Int      @id @default(autoincrement())
+  examId          Int      // Foreign key to Exam model
+  exam            Exam     @relation(fields: [examId], references: [id], onDelete: Cascade) // Relationship with Exam model
+  question        String
+  choiceA         String
+  choiceB         String
+  choiceC         String
+  choiceD         String
+  correctAnswer   String
+  answers         Answer[]
+}
+
+model Document {
+  id            Int      @id @default(autoincrement())
+  documentTitle String
+  address       String   @unique
+  created_at    DateTime @default(now())
+  modified_at   DateTime @updatedAt
+  userId        Int
+  docId         Int
+  user          User     @relation(fields: [userId], references: [id])
+  doc           InstructorUploads     @relation(fields: [docId], references: [id])
+}
+
+model Course {
+  id   Int    @id @default(autoincrement())
+  name String
+  classes Class[]  // One-to-many relationship from Course to Class
+  exams   Exam[] // One-to-many relationship from Course to Question
+}
+
+
+model Class {
+  id         Int   @id @default(autoincrement())
+  name       String
+  courseId   Int   // Foreign key for Course
+  userId     Int   // Foreign key for User
+
+  // Foreign key constraints with cascading delete
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rooms Room[] // One-to-many relationship from Class to Room
+}
+
+model Room {
+  id       Int    @id @default(autoincrement())
+  name     String
+  classId  Int    // Foreign key for Class
+  userId   Int    // Foreign key for User
+
+  // Foreign key constraints with cascading delete
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model InstructorUploads {
+  id       Int    @id @default(autoincrement())
+  fileName String
+  filePath   String
+  userId   Int
+  
+  // Relationship with User (relation name to match with User model)
+  user User @relation(fields: [userId], references: [id], name: "UserToInstructorUploads")
+  docs Document[]
+}
+model Result {
+  id        Int   @id @default(autoincrement())
+  result    Int
+  examId    Int
+  studentId Int
+
+  exam      Exam  @relation(fields: [examId], references: [id])
+  student   User  @relation(fields: [studentId], references: [id])
+}
+model Answer {
+  id        Int    @id @default(autoincrement())
+  answer    String
+  questionId Int
+  studentId Int
+
+  question  Question @relation(fields: [questionId], references: [id])
+  student   User     @relation(fields: [studentId], references: [id])
+}
