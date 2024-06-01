@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { createHash } = require('crypto');
+const { createAccessToken } = require('../utils/authUtils');
+const {hashPassword} = require('../utils/passwordUtils')
 
 const generateRandomUsername = (fName, lName) => {
   // Generate a random username
@@ -8,12 +9,13 @@ const generateRandomUsername = (fName, lName) => {
   return `${fName.toLowerCase()}${lName.toLowerCase()}${randomNum}`;
 };
 
-const generateQRCodeValue = (formData) => {
+const generateQRCodeValue = async (formData) => {
   const fullName = `${formData.fName} ${formData.mName} ${formData.lName}`;
   const details = `${fullName}|${formData.gender}|${formData.dob}|${formData.email}|${formData.phone}|${formData.address}`;
 
   // Create a hash of the details
-  return createHash('sha256').update(details).digest('hex');
+  const hashedQr = await hashPassword(details);
+  return hashedQr
 };
 // Function to get all classes with related data
 const getAllClassesWithRelatedData = async (req, res) => {
@@ -57,7 +59,7 @@ const createStudent = async (req, res) => {
       } = req.body;
     const randomUsername = generateRandomUsername(fName, lName);
     const formData = req.body;
-    const qrCodeValue = generateQRCodeValue(formData);
+    const qrCodeValue = await generateQRCodeValue(formData);
     // Create user in the User model
     const newUser = await prisma.user.create({
       data: {
@@ -93,7 +95,7 @@ const createStudent = async (req, res) => {
       await prisma.room.createMany({
         data: classData
       });
-      res.status(201).json({ message: "User created successfully", qrCodeValue });
+      res.status(201).json({ message: "User created successfully"});
     
   } catch (error) {
     console.error("Error creating user:", error);
@@ -162,5 +164,44 @@ const updateStudent = async (req, res) => {
     res.status(500).json({ error: `Error updating user: ${error.message}` });
   }
 };
+
+const studentSignIn = async (req, res) => {
+  const qrValue = req.body.qrValue;
+
+  try {
+    // Fetch all users from the database
+    const users = await prisma.user.findMany();
+
+    // Loop through the users to find one with a matching password
+    let matchedUser = null;
+    for (const user of users) {
+      if (await verifyPassword(qrValue, user.password)) {
+        matchedUser = user;
+        break;
+      }
+    }
+
+    // If no matching user is found, return an error
+    if (!matchedUser) {
+      return res.status(401).json({ error: 'Invalid QR code' });
+    }
+
+    // Check if the role matches the expected role
+
+    // Create an access token for the user
+    const accessToken = createAccessToken(matchedUser);
+
+    // Respond with the user information and access token
+    res.json({
+      message: 'Sign-in successful',
+      user: matchedUser,
+      accessToken,
+    });
+  } catch (error) {
+    console.error('Error during sign-in:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 
 module.exports = { getAllClassesWithRelatedData, createStudent, fetchAllStudents, deleteStudent, updateStudent };

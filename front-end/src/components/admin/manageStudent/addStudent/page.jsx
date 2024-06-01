@@ -130,7 +130,8 @@ const AddStudent = () => {
         );
 
         if (response.data) {
-          const qrCodeValue = response.data.qrCodeValue;
+          const fullName = `${formData.fName} ${formData.mName} ${formData.lName}`;
+          const qrCodeValue =`${fullName}|${formData.gender}|${formData.dob}|${formData.email}|${formData.phone}|${formData.address}`;
           await downloadPDF(formData, qrCodeValue);
         }
       } catch (error) {

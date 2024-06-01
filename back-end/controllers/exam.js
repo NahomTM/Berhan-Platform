@@ -62,37 +62,44 @@ const fetchExams = async (req, res) => {
     });
 
     // Format exams data
-    const formattedExams = await Promise.all(exams.map(async (exam) => {
-      // Fetch questions for each exam
-      const questions = await prisma.question.findMany({
-        where: { examId: exam.id }
-      });
+    const formattedExams = await Promise.all(
+      exams.map(async (exam) => {
+        // Fetch questions for each exam
+        const questions = await prisma.question.findMany({
+          where: { examId: exam.id },
+        });
 
-      // Format questions data
-      const formattedQuestions = questions.map(question => ({
-        questionId: question.id,
-        question: question.question,
-        choices: [question.choiceA, question.choiceB, question.choiceC, question.choiceD],
-        correctAnswer: question.correctAnswer
-      }));
+        // Format questions data
+        const formattedQuestions = questions.map((question) => ({
+          questionId: question.id,
+          question: question.question,
+          choices: [
+            question.choiceA,
+            question.choiceB,
+            question.choiceC,
+            question.choiceD,
+          ],
+          correctAnswer: question.correctAnswer,
+        }));
 
-      return {
-        examId: exam.id,
-        course: exam.course.name,
-        examName: exam.examName,
-        numberOfQuestions: exam.numberOfQuestions,
-        examCode: exam.examCode,
-        examDate: exam.examDate, // Assuming you have examDate field in the Exam model
-        duration: exam.duration,
-        questions: formattedQuestions
-      };
-    }));
+        return {
+          examId: exam.id,
+          course: exam.course.name,
+          examName: exam.examName,
+          numberOfQuestions: exam.numberOfQuestions,
+          examCode: exam.examCode,
+          examDate: exam.examDate, // Assuming you have examDate field in the Exam model
+          duration: exam.duration,
+          questions: formattedQuestions,
+        };
+      })
+    );
 
     console.log(formattedExams);
     res.json(formattedExams);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -121,6 +128,61 @@ const updateExam = async (req, res) => {
   }
 };
 
+const fetchQuestionsWithExamCode = async (req, res) => {
+  const examCode = req.body.code;
+
+  try {
+    // Fetch the exam with the provided exam code
+    const exam = await prisma.exam.findUnique({
+      where: {
+        examCode,
+      },
+      include: {
+        course: true, // Ensure the course relation is included
+      },
+    });
+
+    // Check if the exam exists
+    if (!exam) {
+      return res.status(404).json({ error: 'Exam not found' });
+    }
+
+    // Fetch questions for the exam
+    const questions = await prisma.question.findMany({
+      where: { examId: exam.id },
+    });
+
+    // Format questions data
+    const formattedQuestions = questions.map((question) => ({
+      questionId: question.id,
+      question: question.question,
+      choicea: question.choiceA,
+      choiceb: question.choiceB,
+      choicec: question.choiceC,
+      choiced: question.choiceD,
+      answers: question.correctAnswer,
+    }));
+
+    const formattedExam = {
+      examId: exam.id,
+      course: exam.course.name,
+      examName: exam.examName,
+      numberOfQuestions: exam.numberOfQuestions,
+      examCode: exam.examCode,
+      examDate: exam.examDate, // Assuming you have examDate field in the Exam model
+      duration: exam.duration,
+      questions: formattedQuestions,
+    };
+
+    console.log(formattedExam);
+    res.json(formattedExam);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 // Controller function to delete an exam
 const deleteExam = async (req, res) => {
   const { id } = req.params;
@@ -133,4 +195,4 @@ const deleteExam = async (req, res) => {
   }
 };
 
-module.exports = { getCourses, fetchExams, updateExam, deleteExam };
+module.exports = { getCourses, fetchExams, updateExam, deleteExam, fetchQuestionsWithExamCode };

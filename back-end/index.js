@@ -15,6 +15,7 @@ const examRoutes = require("./routes/exam");
 const student = require('./routes/student')
 const question = require('./routes/question')
 const profile = require('./routes/profile')
+const result = require('./routes/result')
 const deleteUserById = require('./controllers/delete')
 
 const app = express();
@@ -32,6 +33,7 @@ deleteUserById();
 
 app.get('/', (req, res) => {
   res.send('Welcome to the platform!');
+  console.log(req);
 });
 
 app.use('/auth', auth);
