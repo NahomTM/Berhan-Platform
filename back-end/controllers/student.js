@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { createAccessToken } = require('../utils/authUtils');
-const {hashPassword} = require('../utils/passwordUtils')
+const {hashPassword, verifyPassword} = require('../utils/passwordUtils')
 
 const generateRandomUsername = (fName, lName) => {
   // Generate a random username
