@@ -204,4 +204,4 @@ const studentSignIn = async (req, res) => {
 }
 
 
-module.exports = { getAllClassesWithRelatedData, createStudent, fetchAllStudents, deleteStudent, updateStudent };
+module.exports = { getAllClassesWithRelatedData, createStudent, fetchAllStudents, deleteStudent, updateStudent, studentSignIn };
