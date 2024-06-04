@@ -20,12 +20,12 @@ const seedAdminUser = async () => {
           gender: 'Other',
           dateOfBirth: new Date('1990-01-01'),
           role: 'admin',
-          course: '',
           phoneNumber: '1234567890',
           email: 'admin@example.com',
           password: hashedPassword,
           username: 'admin_user',
           address: '123 Admin Street',
+          profilePic: 'uploads/defaultProfilePage.svg',
         },
       });
 

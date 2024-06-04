@@ -1,0 +1,47 @@
+/* Add this to your CSS file */
+.audio-container {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .close-audio-btn {
+    background-color: #f58742;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    margin-left: 8px;
+  }
+  
+  .close-audio-btn:hover {
+    background-color: #f36907;
+  }
+  
+  .audio-controls {
+    margin-left: 20px;
+  }
+  
+  .audio-controls button {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .audio-controls button:hover {
+    color: #f58742;
+  }
+  
+  .audio-controls button:focus {
+    outline: none;
+  }
+  

@@ -12,6 +12,7 @@ const generateRandomUsername = (fName, lName) => {
 const generateQRCodeValue = async (formData) => {
   const fullName = `${formData.fName} ${formData.mName} ${formData.lName}`;
   const details = `${fullName}|${formData.gender}|${formData.dob}|${formData.email}|${formData.phone}|${formData.address}`;
+  console.log(details);
 
   // Create a hash of the details
   const hashedQr = await hashPassword(details);
@@ -74,6 +75,7 @@ const createStudent = async (req, res) => {
         email,
         phoneNumber: phone,
         address,
+        profilePic: "uploads/defaultProfilePage.svg",
       },
     });
     const classes = await prisma.class.findMany({

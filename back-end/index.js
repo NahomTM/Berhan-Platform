@@ -16,12 +16,18 @@ const student = require('./routes/student')
 const question = require('./routes/question')
 const profile = require('./routes/profile')
 const result = require('./routes/result')
+const user = require('./routes/user')
 const deleteUserById = require('./controllers/delete')
 
 const app = express();
 const port = 4000;
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173'
+};
+
+// Use CORS middleware with custom options
+app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -45,6 +51,8 @@ app.use("/exam", examRoutes);
 app.use("/student", student)
 app.use("/question", question)
 app.use('/profile', profile)
+app.use('/result', result)
+app.use('/user', user)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 

@@ -24,6 +24,7 @@ import ManageStudent from "./components/admin/manageStudent/page";
 import UserProfile from "./pages/profile";
 import MultiStepExamForm2 from "./components/instructor/manageExams/newExam/edit";
 import MessageComponent from "./components/messages/page";
+import ManageResult from "./components/instructor/manageResults/page";
 
 const App = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -147,6 +148,14 @@ const App = () => {
                 element={
                   <ProtectedLayout onLogout={logout}>
                     <ManageExam /> {/* Check correct import/export */}
+                  </ProtectedLayout>
+                }
+              />
+              <Route
+                path="/manageResult"
+                element={
+                  <ProtectedLayout onLogout={logout}>
+                    <ManageResult /> {/* Check correct import/export */}
                   </ProtectedLayout>
                 }
               />

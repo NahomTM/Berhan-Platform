@@ -20,37 +20,42 @@ model User {
   password    String
   username    String  @unique
   address     String
+  profilePic  String
   passChanged Boolean @default(false)
-  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   // Relationships
-  documents Document[]
-  classes        Class[]             // One-to-many relationship from User to Class
-  instructorUploads InstructorUploads[] @relation("UserToInstructorUploads")
-  rooms          Room[]              // One-to-many relationship from User to Room
-  exams          Exam[]
-  results            Result[]
-  answers            Answer[]
+  documents           Document[]
+  classes             Class[]             
+  instructorUploads   InstructorUploads[] @relation("UserToInstructorUploads")
+  rooms               Room[]              
+  exams               Exam[]
+  results             Result[]
+  answers             Answer[]
 }
 
 model Exam {
   id                Int        @id @default(autoincrement())
   courseId          Int
-  course            Course     @relation(fields: [courseId], references: [id])
+  course            Course     @relation(fields: [courseId], references: [id], onDelete: SetNull)
   examCode          String     @unique
   examName          String
   duration          String
   examDate          DateTime
   numberOfQuestions Int
   userId            Int
-  user              User       @relation(fields: [userId], references: [id])
+  user              User       @relation(fields: [userId], references: [id], onDelete: SetNull)
   questions         Question[]
-  results            Result[]
+  results           Result[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Question {
   id              Int      @id @default(autoincrement())
-  examId          Int      // Foreign key to Exam model
-  exam            Exam     @relation(fields: [examId], references: [id], onDelete: Cascade) // Relationship with Exam model
+  examId          Int      
+  exam            Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   question        String
   choiceA         String
   choiceB         String
@@ -58,76 +63,88 @@ model Question {
   choiceD         String
   correctAnswer   String
   answers         Answer[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Document {
   id            Int      @id @default(autoincrement())
   documentTitle String
   address       String   @unique
-  created_at    DateTime @default(now())
-  modified_at   DateTime @updatedAt
   userId        Int
   docId         Int
-  user          User     @relation(fields: [userId], references: [id])
-  doc           InstructorUploads     @relation(fields: [docId], references: [id])
+  user          User     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  docs           InstructorUploads @relation(fields: [docId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Course {
-  id   Int    @id @default(autoincrement())
-  name String
-  classes Class[]  // One-to-many relationship from Course to Class
-  exams   Exam[] // One-to-many relationship from Course to Question
+  id         Int    @id @default(autoincrement())
+  name       String
+  classes    Class[]  
+  exams      Exam[] 
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
-
 
 model Class {
   id         Int   @id @default(autoincrement())
   name       String
-  courseId   Int   // Foreign key for Course
-  userId     Int   // Foreign key for User
+  courseId   Int   
+  userId     Int   
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  // Foreign key constraints with cascading delete
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  rooms Room[] // One-to-many relationship from Class to Room
+  course     Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rooms      Room[] 
 }
 
 model Room {
-  id       Int    @id @default(autoincrement())
-  name     String
-  classId  Int    // Foreign key for Class
-  userId   Int    // Foreign key for User
+  id         Int    @id @default(autoincrement())
+  name       String
+  classId    Int    
+  userId     Int    
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  // Foreign key constraints with cascading delete
-  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  class      Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user       User   @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
+
 model InstructorUploads {
-  id       Int    @id @default(autoincrement())
-  fileName String
+  id         Int    @id @default(autoincrement())
+  fileName   String
   filePath   String
-  userId   Int
-  
-  // Relationship with User (relation name to match with User model)
-  user User @relation(fields: [userId], references: [id], name: "UserToInstructorUploads")
-  docs Document[]
+  userId     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: SetNull, name: "UserToInstructorUploads")
+  docs       Document[]
 }
+
 model Result {
-  id        Int   @id @default(autoincrement())
-  result    Int
-  examId    Int
-  studentId Int
+  id         Int    @id @default(autoincrement())
+  result     Int
+  examId     Int
+  studentId  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  exam      Exam  @relation(fields: [examId], references: [id])
-  student   User  @relation(fields: [studentId], references: [id])
+  exam       Exam    @relation(fields: [examId], references: [id], onDelete: SetNull)
+  student    User    @relation(fields: [studentId], references: [id], onDelete: SetNull)
 }
-model Answer {
-  id        Int    @id @default(autoincrement())
-  answer    String
-  questionId Int
-  studentId Int
 
-  question  Question @relation(fields: [questionId], references: [id])
-  student   User     @relation(fields: [studentId], references: [id])
+model Answer {
+  id         Int    @id @default(autoincrement())
+  answer     String
+  questionId Int
+  studentId  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  student    User     @relation(fields: [studentId], references: [id], onDelete: SetNull)
 }

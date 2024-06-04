@@ -7,6 +7,7 @@ import DataTable from "react-data-table-component";
 import Modal from "react-modal";
 import axios from "axios";
 import "../../../style/modal.css";
+import "../../../style/audio.css";
 
 // Define the app element for React Modal
 Modal.setAppElement("#root");
@@ -20,6 +21,7 @@ const ManageUploads = () => {
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [audioSrc, setAudioSrc] = useState(null);
 
   const columns = [
     {
@@ -31,6 +33,22 @@ const ManageUploads = () => {
         <div className="flex items-center text-md">
           <span className="mr-2">{row.fileName}</span>
         </div>
+      ),
+    },
+    {
+      name: <div className="font-semibold text-lg text-gray-900">Audio</div>,
+      sortable: true,
+      wrap: true,
+      cell: (row) => (
+        <button
+          onClick={() => {
+            handleResult(row.id);
+          }}
+        >
+          <div className="flex items-center text-md text-blue-600 cursor-pointer hover:text-blue-800 hover:underline">
+            <span className="mr-2">Click here</span>
+          </div>
+        </button>
       ),
     },
     {
@@ -122,9 +140,10 @@ const ManageUploads = () => {
   const handleDelete = async (id) => {
     try {
       const accessToken =
-        localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-      await axios.delete(`http://localhost:4000/api/deleteUpload/${id}`,);
-  
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
+      await axios.delete(`http://localhost:4000/api/deleteUpload/${id}`);
+
       // Update the state to remove the deleted item
       const updatedData = examData.filter((item) => item.id !== id);
       setExamData(updatedData);
@@ -133,6 +152,21 @@ const ManageUploads = () => {
       console.error("There was an error deleting the file!", error);
       setError("There was an error deleting the file."); // Handle error
     }
+  };
+
+  const handleResult = async (id) => {
+    console.log("Id: ", id);
+    const response = await axios.get(
+      `http://localhost:4000/api/getAudio/${id}`,
+      { responseType: "blob" }
+    );
+
+    console.log("response: ", response.data);
+
+    const audioURL = URL.createObjectURL(
+      new Blob([response.data], { type: "audio/mp3" })
+    );
+    setAudioSrc(audioURL);
   };
 
   const closeModal = () => {
@@ -151,7 +185,7 @@ const ManageUploads = () => {
   return (
     <div className="justify-center items-center h-screen-minus-18">
       <div className="px-16 py-20 text-lg font-bold text-gray-900">
-        Manage Exam
+        Manage Uploads
       </div>
       <div className="px-16 py-4 max-w-3xl">
         <div className="mb-3 text-lg font-semibold flex text-gray-700 hover:text-gray-900">
@@ -193,6 +227,22 @@ const ManageUploads = () => {
             pagination
           ></DataTable>
         </div>
+        {audioSrc && (
+          <div className="mt-4">
+            <div className="audio-container">
+              <audio controls>
+                <source src={audioSrc} type="audio/mp3" />
+                Your browser does not support the audio element.
+              </audio>
+              <button
+                className="close-audio-btn"
+                onClick={() => setAudioSrc(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <Modal
         isOpen={modalIsOpen}

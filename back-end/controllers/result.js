@@ -35,5 +35,46 @@ const addResult = async (req, res) => {
     }
   };
 
-module.exports = {addResult}
+  const getResultsByExamId = async (req, res) => {
+    const { examId } = req.body;
+  
+    try {
+      const results = await prisma.result.findMany({
+        where: {
+          examId: parseInt(examId),
+        },
+        include: {
+          exam: {
+            select: {
+              examName: true,
+            },
+          },
+          student: {
+            select: {
+              firstName: true,
+              middleName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
+  
+      if (!results || results.length === 0) {
+        return res.status(200).json({ error: 'No results found for the provided exam ID', msg:"failed" });
+      }
+  
+      const formattedResults = results.map(result => ({
+        examName: result.exam.examName,
+        result: result.result,
+        studentName: `${result.student.firstName} ${result.student.middleName || ''} ${result.student.lastName}`,
+      }));
+  
+      return res.status(200).json(formattedResults);
+    } catch (error) {
+      console.error('Error retrieving results:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+module.exports = {addResult, getResultsByExamId}
   

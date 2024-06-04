@@ -8,10 +8,17 @@ const modalCustomStyles = {
     left: "50%",
     right: "auto",
     bottom: "auto",
+    marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-    padding: "2rem",
-    borderRadius: "0.5rem",
-    zIndex: 1000,
+    backgroundColor: "#ffffff",
+    border: "none",
+    borderRadius: "10px",
+    padding: "20px",
+    width: "400px",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 };
 
@@ -89,54 +96,58 @@ const AdminDashboard = () => {
     <div className="flex justify-center items-center h-screen-minus-18">
       <h1>Hello Instructor</h1>
       {showModal && (
-        <Modal
-          style={modalCustomStyles}
-          isOpen={showModal}
-          onRequestClose={handleModalClose} // Custom close handler
-        >
-          <h2>Change Username and Password</h2>
-          <form onSubmit={handleUpdate}>
-            <div className="flex flex-col space-y-4 w-300">
-              <div className="flex flex-col mt-3">
-                <label>Username:</label>
-                <input
-                  type="text"
-                  placeholder={user?.username || ""}
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md outline-none mt-1"
-                />
+          <Modal
+            style={modalCustomStyles}
+            isOpen={showModal}
+            onRequestClose={handleModalClose}
+          >
+            <h2 className="text-gray-800 mb-6 text-md">
+              Change Username and Password
+            </h2>
+            <form onSubmit={handleUpdate}>
+              <div className="flex flex-col space-y-6">
+                <div className="flex flex-col">
+                  <label className="text-gray-700 font-semibold">
+                    Username:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={user?.username || ""}
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    className="border border-gray-300 p-3 rounded-md outline-none mt-1 focus:ring-2 focus:ring-orange-500 transition duration-200"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-gray-700 font-semibold">
+                    Password:
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="border border-gray-300 p-3 rounded-md outline-none mt-1 focus:ring-2 focus:ring-orange-500 transition duration-200"
+                  />
+                </div>
               </div>
-              <div className="flex flex-col">
-                <label>Password:</label>
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md outline-none mb-3 mt-1"
-                />
+              <div className="flex justify-between items-center mt-6">
+                <button
+                  type="submit"
+                  className="px-6 py-2 rounded-md bg-orange-500 text-white font-semibold hover:bg-orange-600 transition duration-200"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={handleModalClose}
+                  className="px-6 py-2 rounded-md bg-gray-300 text-gray-700 font-semibold hover:bg-gray-400 transition duration-200"
+                >
+                  Close
+                </button>
               </div>
-            </div>
-
-            <div className="flex justify-between items-center mt-4">
-              <button
-                type="submit"
-                className="border border-gray-300 px-4 py-2 rounded-md bg-blue-500 text-white"
-              >
-                Update
-              </button>
-
-              <button
-                onClick={handleModalClose}
-                className="border border-gray-300 px-4 py-2 rounded-md bg-red-500 text-white"
-              >
-                Close
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
+            </form>
+          </Modal>
+        )}
     </div>
   );
 };

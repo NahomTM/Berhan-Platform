@@ -6,6 +6,7 @@ import { FaEdit, FaEye, FaTrash } from "react-icons/fa";
 import DataTable from "react-data-table-component";
 import Modal from "react-modal";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const modalCustomStyles = {
   content: {
@@ -32,6 +33,7 @@ const ManageExam = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalType, setModalType] = useState("");
   const [courses, setCourses] = useState([]);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     course: "",
@@ -69,6 +71,7 @@ const ManageExam = () => {
           <span className="mr-2">{row.examCode}</span>
         </div>
       ),
+      width: '170px',
     },
     {
       name: (
@@ -83,6 +86,22 @@ const ManageExam = () => {
         </div>
       ),
       width: "250px",
+    },
+    {
+      name: <div className="font-semibold text-lg text-gray-900">Results</div>,
+      sortable: true,
+      wrap: true,
+      cell: (row) => (
+        <button
+          onClick={() => {
+            handleResult(row);
+          }}
+        >
+          <div className="flex items-center text-md text-blue-600 cursor-pointer hover:text-blue-800 hover:underline">
+            <span className="mr-2">Click here</span>
+          </div>
+        </button>
+      ),
     },
     {
       name: (
@@ -190,28 +209,42 @@ const ManageExam = () => {
     setModalIsOpen(false);
   };
 
+  const handleResult = async (row) => {
+    const response = await axios.post(
+      "http://localhost:4000/result/getResult",
+      { examId: sessionStorage.getItem("examId") }
+    );
+
+    if (response.data.msg === "failed") {
+      alert("No results for this exam yet");
+    } else {
+      sessionStorage.setItem("examId", row.examId);
+      navigate("/manageResult");
+    }
+  };
+
   const handleUpdateExam = async () => {
     try {
       console.log("current exam: ", currentExam);
-      await axios.put(
-        `http://localhost:4000/question/updateExam/${currentExam.examId}`,
-        currentExam
-      ).then((res) => {
-        const updatedExam = examData.map((e) =>
-          e.id === currentExam.id ? currentExam : e
-        ); // Update state with new data
-  
-        
-        setExamData(updatedExam); // Update state
-        setModalIsOpen(false);
-        setStep(0)
-      }); // Update endpoint
-       // Close modal
+      await axios
+        .put(
+          `http://localhost:4000/question/updateExam/${currentExam.examId}`,
+          currentExam
+        )
+        .then((res) => {
+          const updatedExam = examData.map((e) =>
+            e.id === currentExam.id ? currentExam : e
+          ); // Update state with new data
+
+          setExamData(updatedExam); // Update state
+          setModalIsOpen(false);
+          setStep(0);
+        }); // Update endpoint
+      // Close modal
     } catch (err) {
       console.error("Error updating exam:", err);
     }
   };
-  
 
   const handleQuestionChange = (index, field, value) => {
     const updatedQuestions = currentExam.questions.map((question, idx) => {
@@ -514,7 +547,7 @@ const ManageExam = () => {
               <button
                 type="submit"
                 onClick={handleUpdateExam}
-                className="bg-green-500 text-white px-4 py-2 rounded"
+                className= {`${modalType === "edit" ? "bg-green-500 text-white px-4 py-2 rounded" : "hidden"}`}
               >
                 Submit
               </button>

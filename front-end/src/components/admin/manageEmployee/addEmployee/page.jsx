@@ -30,6 +30,7 @@ const AddEmployee = () => {
   const [availableCourses, setAvailableCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [submitError, setSubmitError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -131,6 +132,7 @@ const AddEmployee = () => {
             selectedCourses,
           }
         );
+        setSuccessMessage("Employee added successfully");
         console.log("Form submitted:", response.data);
         // Handle success, like showing a success message or redirecting
       } catch (error) {
@@ -390,6 +392,9 @@ const AddEmployee = () => {
             >
               Submit
             </button>
+            {successMessage && (
+            <div className="text-gray-700 text-center mt-4">{successMessage}</div>
+          )}
           </div>
         </form>
       </div>

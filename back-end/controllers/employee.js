@@ -70,6 +70,7 @@ const addEmployee = async (req, res) => {
         password: hashedPassword,
         username: randomUsername,
         address,
+        profilePic: "uploads/defaultProfilePage.svg",
       },
     });
 

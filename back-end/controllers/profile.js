@@ -1,6 +1,8 @@
 // backend/controllers/profileController.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const fs = require('fs');
+const path = require('path');
 
 // Fetch user profile
 const getUserProfile = async (req, res) => {
@@ -11,22 +13,23 @@ const getUserProfile = async (req, res) => {
       where: {
         id: userId,
       },
-      select: {
-        firstName: true,
-        middleName: true,
-        lastName: true,
-        email: true,
-        dateOfBirth: true,
-        phoneNumber: true,
-        address: true,
-      },
     });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    const profilePicPath = path.join(__dirname, '../', user.profilePic);
+    const profilePic = fs.readFileSync(profilePicPath, { encoding: 'base64' });
+
+    const userData = {
+      ...user,
+      profilePic: `data:image/svg+xml;base64,${profilePic}`,
+    };
+
+    console.log(userData);
+
+    res.json(userData);
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ message: 'Internal server error' });

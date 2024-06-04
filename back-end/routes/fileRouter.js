@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { uploadFile, getFile, getUploads, textToSpeech, deleteUpload, uploadFileAndTextToSpeech } = require('../controllers/fileController');
+const { uploadFile, getFile, getUploads, textToSpeech, deleteUpload, uploadFileAndTextToSpeech, getAudio } = require('../controllers/fileController');
 const authenticateToken = require('../middleware/authenticateToken');
 const router = express.Router();
 
@@ -25,5 +25,6 @@ router.post('/upload', authenticateToken, upload.single('file'), uploadFileAndTe
 router.get('/file/:id', getFile);
 router.get('/getUploads', authenticateToken, getUploads)
 router.delete('/deleteUpload/:id', deleteUpload)
+router.get('/getAudio/:id', getAudio)
 
 module.exports = router;
