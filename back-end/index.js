@@ -17,6 +17,8 @@ const question = require('./routes/question')
 const profile = require('./routes/profile')
 const result = require('./routes/result')
 const user = require('./routes/user')
+const room = require('./routes/room')
+const document = require('./routes/document')
 const deleteUserById = require('./controllers/delete')
 
 const app = express();
@@ -53,6 +55,8 @@ app.use("/question", question)
 app.use('/profile', profile)
 app.use('/result', result)
 app.use('/user', user)
+app.use('/room', room)
+app.use('/document', document)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 

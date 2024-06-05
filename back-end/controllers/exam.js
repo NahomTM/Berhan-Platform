@@ -40,6 +40,20 @@ const getCourses = async (req, res) => {
     return res.status(500).json({ error: "Server error", detail: err.message });
   }
 };
+const getAllExams = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const exams = await prisma.exam.findMany({
+      where: {
+        userId: userId,
+      },
+    });
+    res.status(200).json(exams);
+  } catch (error) {
+    console.error("Error fetching exams:", error);
+    res.status(500).json({ error: "Failed to fetch exams" });
+  }
+};
 
 const fetchExams = async (req, res) => {
   const userId = req.user.id;
@@ -195,4 +209,4 @@ const deleteExam = async (req, res) => {
   }
 };
 
-module.exports = { getCourses, fetchExams, updateExam, deleteExam, fetchQuestionsWithExamCode };
+module.exports = { getCourses, fetchExams, updateExam, deleteExam, fetchQuestionsWithExamCode, getAllExams };

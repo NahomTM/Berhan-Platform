@@ -213,7 +213,7 @@ const AdminDashboard = () => {
         <div className="h-300 ml-5 px-5 py-8">
           <div style={{ display: "flex", gap: "20px" }}>
             {cardData.map((card, index) => (
-              <div className="w-320" key={index}>
+              <div className="w-320 cursor-pointer" key={index}>
                 <ActionAreaCard
                   title={card.title}
                   description={card.description}
