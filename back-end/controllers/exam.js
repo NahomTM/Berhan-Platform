@@ -166,6 +166,14 @@ const fetchQuestionsWithExamCode = async (req, res) => {
       where: { examId: exam.id },
     });
 
+    // Map to convert answer letters to numbers
+    const answerMap = {
+      A: "1",
+      B: "2",
+      C: "3",
+      D: "4",
+    };
+
     // Format questions data
     const formattedQuestions = questions.map((question) => ({
       questionId: question.id,
@@ -174,7 +182,7 @@ const fetchQuestionsWithExamCode = async (req, res) => {
       choiceb: question.choiceB,
       choicec: question.choiceC,
       choiced: question.choiceD,
-      answers: question.correctAnswer,
+      answers: answerMap[question.correctAnswer], // Convert letter to number
     }));
 
     const formattedExam = {
@@ -195,6 +203,7 @@ const fetchQuestionsWithExamCode = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 // Controller function to delete an exam

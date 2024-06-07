@@ -27,9 +27,10 @@ const ManageResult = () => {
   const [filterValue, setFilterValue] = useState("");
   const [filterType, setFilterType] = useState("name"); // Default filter type
   const [modalIsOpen, setModalIsOpen] = useState(false); // Modal state
-  const [currentCourse, setCurrentCourse] = useState(null); // Selected course for view/edit
+  const [currentExam, setCurrentExam] = useState(null); // Selected exam for view/edit
   const [modalType, setModalType] = useState(""); // 'view' or 'edit' mode for the modal
-  const [originalCourse, setOriginalCourse] = useState([]);
+  const [originalExam, setOriginalExam] = useState([]);
+
   // Define columns for the data table
   const columns = [
     {
@@ -52,18 +53,48 @@ const ManageResult = () => {
       sortable: true,
       wrap: true,
     },
+    {
+      name: (
+        <div className="font-semibold text-lg text-gray-900 justify-center items-center px-3 w-160">
+          Actions
+        </div>
+      ),
+      cell: (row) => (
+        <div className="flex">
+          <button className="px-2" onClick={() => handleView(row)}>
+            <FaEye size={17} />
+          </button>
+          <button className="px-2" onClick={() => handleEdit(row)}>
+            <FaEdit size={17} />
+          </button>
+          <button className="px-2" onClick={() => handleDelete(row.resultId)}>
+            <FaTrash size={17} />
+          </button>
+        </div>
+      ),
+    },
   ];
 
   // Fetch data from the backend when the component mounts
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const examId = sessionStorage.getItem("examId");
         const response = await axios.post(
-          "http://localhost:4000/result/getResult", {examId:sessionStorage.getItem("examId")}
+          "http://localhost:4000/result/getResult",
+          { examId }
         ); // Backend endpoint
-        setData(response.data.reverse()); // Set fetched data
-        setOriginalCourse(response.data.reverse());
-        console.log(response.data);
+        const formattedResults = response.data.map(result => ({
+          studentId: result.studentId,
+          examId: result.examId,
+          resultId: result.resultId,
+          examName: result.examName,
+          result: result.result,
+          studentName: result.studentName,
+        }));
+        setData(formattedResults.reverse()); // Set fetched data
+        setOriginalExam(formattedResults.reverse());
+        console.log(formattedResults);
         setLoading(false); // Turn off loading
       } catch (err) {
         setError(err.message); // Handle error
@@ -75,15 +106,15 @@ const ManageResult = () => {
   }, []); // Empty dependency array to fetch data once
 
   // Handle view action
-  const handleView = (course) => {
-    setCurrentCourse(course); // Set current course
+  const handleView = (exam) => {
+    setCurrentExam(exam); // Set current exam
     setModalType("view"); // Set to view mode
     setModalIsOpen(true); // Open modal
   };
 
   // Handle edit action
-  const handleEdit = (course) => {
-    setCurrentCourse(course); // Set current course
+  const handleEdit = (exam) => {
+    setCurrentExam(exam); // Set current exam
     setModalType("edit"); // Set to edit mode
     setModalIsOpen(true); // Open modal
   };
@@ -91,37 +122,37 @@ const ManageResult = () => {
   // Handle delete action
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:4000/course/deleteCourse/${id}`); // Endpoint for deleting
-      setData(data.filter((course) => course.id !== id)); // Remove course
+      await axios.delete(`http://localhost:4000/result/deleteResult/${id}`); // Endpoint for deleting
+      setData(data.filter((exam) => exam.resultId !== id)); // Remove exam
     } catch (err) {
-      console.error("Error deleting course:", err);
+      console.error("Error deleting result:", err);
     }
   };
 
   // Handle field changes in modal form (for editing)
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
-    setCurrentCourse({
-      ...currentCourse,
+    setCurrentExam({
+      ...currentExam,
       [name]: value,
     });
   };
 
-  // Handle updating the course
-  const handleUpdateCourse = async () => {
+  // Handle updating the result
+  const handleUpdateExam = async () => {
     try {
       await axios.put(
-        `http://localhost:4000/course/updateCourse/${currentCourse.id}`,
-        currentCourse
+        `http://localhost:4000/result/updateResult/${currentExam.resultId}`,
+        { result: currentExam.result }
       ); // Endpoint for updating
       setData(
-        data.map((course) =>
-          course.id === currentCourse.id ? currentCourse : course
+        data.map((exam) =>
+          exam.resultId === currentExam.resultId ? currentExam : exam
         )
-      ); // Update data with modified course
+      ); // Update data with modified exam
       setModalIsOpen(false); // Close modal
     } catch (err) {
-      console.error("Error updating course:", err);
+      console.error("Error updating result:", err);
     }
   };
 
@@ -130,9 +161,9 @@ const ManageResult = () => {
     const value = event.target.value;
     setFilterValue(value);
 
-    const filteredData = originalCourse.filter((row) => {
+    const filteredData = originalExam.filter((row) => {
       if (filterType === "name") {
-        return row.name.toLowerCase().includes(value.toLowerCase());
+        return row.examName.toLowerCase().includes(value.toLowerCase());
       } else {
         return true; // Default to show all records
       }
@@ -148,7 +179,7 @@ const ManageResult = () => {
 
     const filteredData = data.filter((row) => {
       if (value === "name") {
-        return row.name.toLowerCase().includes(filterValue.toLowerCase());
+        return row.examName.toLowerCase().includes(filterValue.toLowerCase());
       } else {
         return true; // Default to all records if filter type is not specified
       }
@@ -168,19 +199,9 @@ const ManageResult = () => {
   return (
     <div className="justify-center items-center h-screen-minus-18">
       <div className="px-16 py-20 text-lg font-bold text-gray-900">
-        Manage Courses
+        Manage Results
       </div>
       <div className="px-16 py-4 w-full max-w-4xl">
-        <div className="mb-3 text-lg font-semibold flex">
-          <Link to="/addNewCourse">
-            <button className="flex">
-              Create new course{" "}
-              <span className="ml-1 py-1">
-                <FaCirclePlus color="green" size={23} />
-              </span>
-            </button>
-          </Link>
-        </div>
         <div className="flex items-center mb-5">
           <input
             type="text"
@@ -217,25 +238,45 @@ const ManageResult = () => {
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         style={modalCustomStyles}
-        contentLabel={modalType === "edit" ? "Edit Course" : "View Course"}
+        contentLabel={modalType === "edit" ? "Edit Result" : "View Result"}
       >
         <div className="flex flex-col space-y-4 w-300">
           <h2 className="text-xl font-semibold text-center">
-            {modalType === "edit" ? "Edit Course" : "View Course"}
+            {modalType === "edit" ? "Edit Result" : "View Result"}
           </h2>
           <div className="flex flex-col">
-            <label>Name:</label>
+            <label>Student Name:</label>
             <input
               type="text"
-              name="name"
-              value={currentCourse?.name || ""}
+              name="studentName"
+              value={currentExam?.studentName || ""}
+              readOnly
+              className="border border-gray-300 p-2 rounded-md outline-none"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label>Exam Name:</label>
+            <input
+              type="text"
+              name="examName"
+              value={currentExam?.examName || ""}
+              readOnly
+              className="border border-gray-300 p-2 rounded-md outline-none"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label>Result:</label>
+            <input
+              type="text"
+              name="result"
+              value={currentExam?.result || ""}
               onChange={handleFieldChange}
               className="border border-gray-300 p-2 rounded-md outline-none"
               disabled={modalType === "view"}
             />
           </div>
           {modalType === "edit" ? (
-            <button onClick={handleUpdateCourse}>Update</button>
+            <button onClick={handleUpdateExam}>Update</button>
           ) : (
             <button onClick={() => setModalIsOpen(false)}>Close</button>
           )}

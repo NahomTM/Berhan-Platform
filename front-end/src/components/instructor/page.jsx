@@ -237,7 +237,7 @@ const InstructorDashboard = () => {
           <div className="flex">
             <div className="mt-10 w-600">
               <div className="text-md font-semibold text-gray-700 ml-6 mb-3">
-                <h1>Employee Statistical Analysis</h1>
+                <h1>Exams' and Uploads' Statistical Analysis</h1>
               </div>
               <InstLineChart />
             </div>

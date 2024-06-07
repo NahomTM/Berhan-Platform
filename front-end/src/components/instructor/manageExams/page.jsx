@@ -210,9 +210,10 @@ const ManageExam = () => {
   };
 
   const handleResult = async (row) => {
+    const examId = row.examId 
     const response = await axios.post(
       "http://localhost:4000/result/getResult",
-      { examId: sessionStorage.getItem("examId") }
+      { examId }
     );
 
     if (response.data.msg === "failed") {

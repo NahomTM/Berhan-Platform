@@ -11,6 +11,7 @@ import { FaBook } from "react-icons/fa";
 import { PiStudentBold } from "react-icons/pi";
 import LineChart from "../../icons/lineChart2";
 import AlignItemsList from "../../icons/list";
+import { Link } from "react-router-dom";
 
 const modalCustomStyles = {
   content: {
@@ -181,16 +182,19 @@ const AdminDashboard = () => {
       title: "Employee",
       description: `Total number of employees: ${employeeCount}`,
       icon: <IoPersonOutline size={70} />,
+      link: "/manageEmployee",
     },
     {
       title: "Student",
       description: `Total number of students: ${studentCount}`,
       icon: <PiStudentBold size={70} />,
+      link: "/manageStudent",
     },
     {
       title: "Course",
       description: `Total number of courses: ${courseCount}`,
       icon: <FaBook size={70} />,
+      link: "/manageCourse",
     },
   ];
   const formatDate = (dateString) => {
@@ -214,11 +218,13 @@ const AdminDashboard = () => {
           <div style={{ display: "flex", gap: "20px" }}>
             {cardData.map((card, index) => (
               <div className="w-320 cursor-pointer" key={index}>
-                <ActionAreaCard
-                  title={card.title}
-                  description={card.description}
-                  icon={card.icon}
-                />
+                <Link to = {card.link}>
+                  <ActionAreaCard
+                    title={card.title}
+                    description={card.description}
+                    icon={card.icon}
+                  />
+                </Link>
               </div>
             ))}
           </div>

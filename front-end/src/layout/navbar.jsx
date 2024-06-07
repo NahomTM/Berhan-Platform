@@ -31,23 +31,6 @@ const Navbar = () => {
   return (
     <nav className="bg-[#0f0f0f] flex-1 h-18 justify-between">
       <div className="flex items-center gap-x-5 justify-end">
-        <div className="relative flex mt-5 mr-32">
-          <span className="relative inset-y-0 left-3 flex items-center">
-            <div className={`absolute`}>
-              <IoSearchSharp size={20} color="black" />
-            </div>
-          </span>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder={searchInput}
-            className="w-72 h-8 flex rounded shadow outline-none pl-9"
-            onClick={handleInputClick}
-          />
-        </div>
-        <div className="mt-5 mr-4 cursor-pointer">
-            <IoNotificationsCircleSharp size={28} color="White" />
-        </div>
         <div className="mt-5 mr-28 cursor-pointer">
           <Link to="/manageProfile">
             <button>

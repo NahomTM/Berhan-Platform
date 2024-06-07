@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { RiMenuFill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,26 +13,27 @@ const Sidebar = ({ onLogout }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    const localToken = localStorage.getItem('accessToken'); // Get the token from local storage
-    const sessionToken = sessionStorage.getItem('accessToken'); // Get the token from session storage
+    const localToken = localStorage.getItem("accessToken"); // Get the token from local storage
+    const sessionToken = sessionStorage.getItem("accessToken"); // Get the token from session storage
     const accessToken = localToken || sessionToken; // Use whichever token is found
-  
+
     if (accessToken) {
       axios
-        .post('http://localhost:4000/auth/verify-role', { token: accessToken }) // Verify the token
+        .post("http://localhost:4000/auth/verify-role", { token: accessToken }) // Verify the token
         .then((res) => {
           const role = res.data.role;
-  
-          if (role === 'admin') {
+
+          if (role === "admin") {
             setMenuData(adminMenuData);
-          } else if (role === 'instructor') {
+          } else if (role === "instructor") {
             setMenuData(instructorMenuData);
           }
         })
         .catch((error) => {
-          console.error('Error verifying role:', error); // Handle errors properly
+          console.error("Error verifying role:", error); // Handle errors properly
         })
         .finally(() => {
           setLoading(false); // Set loading to false after verification
@@ -41,7 +42,7 @@ const Sidebar = ({ onLogout }) => {
       setLoading(false); // No token, set loading to false
     }
   }, []);
-   // Run only once on mount
+  // Run only once on mount
 
   if (loading) {
     return <div>Loading...</div>;
@@ -49,8 +50,10 @@ const Sidebar = ({ onLogout }) => {
 
   const handleExitClick = () => {
     logout(); // Clear authentication context
-    navigate('/'); // Redirect to the sign-in page
+    navigate("/"); // Redirect to the sign-in page
   };
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
 
   return (
     <div
@@ -73,13 +76,13 @@ const Sidebar = ({ onLogout }) => {
               : "duration-500 delay-200 overflow-hidden"
           } px-8 text-2xl`}
         >
-          Berhan
+          Clarus
           <span
             className={`${
               open ? "duration-500" : "duration-500 delay-200 overflow-hidden"
             } text-2xl text-orange-400`}
           >
-            Tech
+            EDU
           </span>
         </div>
       </div>
@@ -120,15 +123,27 @@ const Sidebar = ({ onLogout }) => {
           </Link>
         ))}
       </div>
-      <div></div>
-      <div className="mt-auto flex justify-between items-center pb-6 -ml-1">
-
-        <CustomizedSwitches/> {/* Theme mode switch */}
+      <div
+        className={`${
+          open ? "mt-auto flex items-center pb-10 ml-3" : "mt-auto pb-10 flex"
+        }`}
+      >
+        {/* <CustomizedSwitches/> Theme mode switch */}
         <ImExit
           onClick={handleExitClick}
           size={26}
           className="text-white cursor-pointer"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         />
+        <h2
+          className={`flex ml-2 transition-opacity duration-300 font-semibold ${
+            isHovered ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ transitionDelay: isHovered ? "100ms" : "0ms" }}
+        >
+          Log Out
+        </h2>
       </div>
     </div>
   );
