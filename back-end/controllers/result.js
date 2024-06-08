@@ -166,7 +166,7 @@ const fetchedPublished = async (req, res) => {
   try {
     const publishedResult = await prisma.result.findMany({
       where:{
-        studentId: studentId,
+        studentId: parseInt(studentId),
         published: isPublished,
       },
       include: {
