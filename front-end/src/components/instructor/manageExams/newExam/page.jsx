@@ -17,6 +17,7 @@ const MultiStepExamForm = () => {
     duration: "",
     questions: [],
   });
+  const [dbExamCodes, setDbExamCodes] = useState([]);
 
   const [courses, setCourses] = useState([]);
 
@@ -72,12 +73,28 @@ const MultiStepExamForm = () => {
     });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1) {
       const { course, examName, numberOfQuestions, examCode, examDate, duration } = formData;
+      const accessToken = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
+
+      const response = await axios.get("http://localhost:4000/exam/getLineExam", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      const exams = response.data;
+      const dbExamCodes = exams.map(exam => exam.examCode);
+      const examCodeExists = dbExamCodes.includes(examCode)
 
       if (!course || !examName || !examCode || !examDate) {
         toast.error("Please fill in all required fields.");
+        return;
+      }
+
+      if (examCodeExists) {
+        toast.error("Exam Code taken")
         return;
       }
 

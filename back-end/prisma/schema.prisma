@@ -132,6 +132,7 @@ model Result {
   studentId  Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  published Boolean @default(false)
 
   exam       Exam    @relation(fields: [examId], references: [id], onDelete: SetNull)
   student    User    @relation(fields: [studentId], references: [id], onDelete: SetNull)

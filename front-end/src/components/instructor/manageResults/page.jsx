@@ -84,13 +84,14 @@ const ManageResult = () => {
           "http://localhost:4000/result/getResult",
           { examId }
         ); // Backend endpoint
-        const formattedResults = response.data.map(result => ({
+        const formattedResults = response.data.map((result) => ({
           studentId: result.studentId,
           examId: result.examId,
           resultId: result.resultId,
           examName: result.examName,
           result: result.result,
           studentName: result.studentName,
+          numberOfQuestions: result.numberOfQuestions,
         }));
         setData(formattedResults.reverse()); // Set fetched data
         setOriginalExam(formattedResults.reverse());
@@ -141,19 +142,38 @@ const ManageResult = () => {
   // Handle updating the result
   const handleUpdateExam = async () => {
     try {
-      await axios.put(
-        `http://localhost:4000/result/updateResult/${currentExam.resultId}`,
-        { result: currentExam.result }
-      ); // Endpoint for updating
-      setData(
-        data.map((exam) =>
-          exam.resultId === currentExam.resultId ? currentExam : exam
-        )
-      ); // Update data with modified exam
-      setModalIsOpen(false); // Close modal
+      if (currentExam.result > currentExam.numberOfQuestions) {
+        alert(
+          `The number of questions for this exam is ${currentExam.numberOfQuestions} `
+        );
+      } else {
+        await axios.put(
+          `http://localhost:4000/result/updateResult/${currentExam.resultId}`,
+          { result: currentExam.result }
+        ); // Endpoint for updating
+        setData(
+          data.map((exam) =>
+            exam.resultId === currentExam.resultId ? currentExam : exam
+          )
+        ); // Update data with modified exam
+        setModalIsOpen(false); // Close modal
+      }
     } catch (err) {
       console.error("Error updating result:", err);
     }
+  };
+
+  const handlePublishResult = async () => {
+    try {
+      const published = true;
+      const examId = originalExam[0].examId;
+      const response = await axios.put(
+        `http://localhost:4000/result/publishResult/${examId}`,
+        { published }
+      );
+      const msg = response.data.msg
+      alert(msg)
+    } catch (error) {}
   };
 
   // Handle filter value change
@@ -217,10 +237,20 @@ const ManageResult = () => {
           <select
             value={filterType}
             onChange={handleFilterTypeChange}
-            className="appearance-none px-1 py-1/2 items-center border-2 border-gray-900 rounded-md focus:outline-none ml-2 text-center text-gray-900"
+            className="cursor-pointer appearance-none px-1 py-1/2 items-center border-2 border-gray-900 rounded-md focus:outline-none ml-2 text-center text-gray-900"
           >
             <option value="name">Name</option>
           </select>
+          <div className="ml-auto mr-2">
+            <button
+              className="border-2 px-4 py-1 hover:bg-orange-400 rounded-lg text-gray-600 font-semibold hover:text-white"
+              onClick={() => {
+                handlePublishResult();
+              }}
+            >
+              Publish Result
+            </button>
+          </div>
         </div>
 
         <div>

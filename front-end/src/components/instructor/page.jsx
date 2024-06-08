@@ -5,6 +5,7 @@ import { PiExam, PiStudentBold, PiUploadSimpleBold } from "react-icons/pi";
 import ActionAreaCard from "../../icons/card";
 import InstLineChart from "../../icons/lineCharts";
 import AlignItemsList from "../../icons/list";
+import InstLineChart2 from "../../icons/lineCharts3";
 
 const modalCustomStyles = {
   content: {
@@ -53,8 +54,7 @@ const InstructorDashboard = () => {
       const rooms = response.data;
 
       // Create a Set to store unique user IDs
-      const uniqueUserIds = new Set(rooms.map((room) => room.user.id));
-      setMyStudents(uniqueUserIds.size);
+      setMyStudents(rooms.length);
       const examResponse = await axios.get(
         "http://localhost:4000/exam/getLineExam",
         {
@@ -65,13 +65,8 @@ const InstructorDashboard = () => {
       );
       const exams = examResponse.data;
 
-      const examNumbers = new Set(
-        exams.map((exam) => {
-          exam.examId;
-        })
-      );
 
-      setMyExams(examNumbers.size);
+      setMyExams(exams.length);
 
       const uploadResponse = await axios.get(
         "http://localhost:4000/api/getUploads",
@@ -84,9 +79,7 @@ const InstructorDashboard = () => {
 
       const uploads = uploadResponse.data;
 
-      const uploadNumbers = new Set(uploads.map((upload) => upload.id));
-
-      setMyUploads(uploadNumbers.size);
+      setMyUploads(uploads.length);
       const today = new Date();
       const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
@@ -239,7 +232,7 @@ const InstructorDashboard = () => {
               <div className="text-md font-semibold text-gray-700 ml-6 mb-3">
                 <h1>Exams' and Uploads' Statistical Analysis</h1>
               </div>
-              <InstLineChart />
+              <InstLineChart2 />
             </div>
             <div className="mt-10 ml-14 bg-white shadow-lg rounded-lg py-4 h-380 w-370 overflow-y-auto ">
               <div className="ml-5 font-bold text-gray-700">

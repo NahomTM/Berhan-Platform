@@ -195,8 +195,6 @@ const fetchQuestionsWithExamCode = async (req, res) => {
       duration: exam.duration,
       questions: formattedQuestions,
     };
-
-    console.log(formattedExam);
     res.json(formattedExam);
   } catch (error) {
     console.error(error);
