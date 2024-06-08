@@ -7,6 +7,6 @@ router.post('/getResult', getResultsByExamId)
 router.delete('/deleteResult/:id', deleteResult);
 router.put('/updateResult/:id', updateResult);
 router.put('/publishResult/:id', publishResult)
-router.get('/getPublished', fetchedPublished)
+router.post('/getPublished', fetchedPublished)
 
 module.exports = router
