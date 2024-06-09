@@ -6,6 +6,8 @@ import { FaCirclePlus } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import Modal from "react-modal";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const modalCustomStyles = {
   content: {
@@ -143,7 +145,7 @@ const ManageResult = () => {
   const handleUpdateExam = async () => {
     try {
       if (currentExam.result > currentExam.numberOfQuestions) {
-        alert(
+        toast.error(
           `The number of questions for this exam is ${currentExam.numberOfQuestions} `
         );
       } else {
@@ -172,7 +174,13 @@ const ManageResult = () => {
         { published }
       );
       const msg = response.data.msg
-      alert(msg)
+      if (msg === "success") {
+        toast.success(msg)
+      }
+      else{
+        toast.info(msg)
+      }
+      
     } catch (error) {}
   };
 
@@ -218,6 +226,7 @@ const ManageResult = () => {
 
   return (
     <div className="justify-center items-center h-screen-minus-18">
+      <ToastContainer/>
       <div className="px-16 py-20 text-lg font-bold text-gray-900">
         Manage Results
       </div>

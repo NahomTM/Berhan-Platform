@@ -158,7 +158,16 @@ const fetchQuestionsWithExamCode = async (req, res) => {
 
     // Check if the exam exists
     if (!exam) {
-      return res.status(404).json({ error: 'Exam not found' });
+      return res.status(404).json({ success: false, message: 'Exam not found' });
+    }
+
+    // Get the current date
+    const currentDate = new Date();
+    const examDate = new Date(exam.examDate);
+
+    // Compare the exam date and the current date
+    if (examDate.toDateString() !== currentDate.toDateString()) {
+      return res.json({ success: false, message: "The exam date hasn't arrived yet" });
     }
 
     // Fetch questions for the exam
@@ -195,12 +204,14 @@ const fetchQuestionsWithExamCode = async (req, res) => {
       duration: exam.duration,
       questions: formattedQuestions,
     };
-    res.json(formattedExam);
+
+    res.json({ success: true, data: formattedExam });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
 
 
 

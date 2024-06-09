@@ -13,12 +13,16 @@ export const AuthProvider = ({ children }) => {
     // Check for access token in both storages
     const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     if (accessToken) {
-      setIsLoggedIn(true)
+      setIsLoggedIn(true);
     }
-   // Set state based on token presence
   }, []); // Run once on mount
 
-  const login = () => {
+  const login = (token, rememberMe) => {
+    if (rememberMe) {
+      localStorage.setItem('accessToken', token);
+    } else {
+      sessionStorage.setItem('accessToken', token);
+    }
     setIsLoggedIn(true); // Update the state when logging in
   };
 

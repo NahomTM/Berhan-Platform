@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaBook } from "react-icons/fa";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const NewCourse = () => {
   const [formData, setFormData] = useState({
@@ -24,37 +26,37 @@ const NewCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let newErrors = {};
-
+    let hasErrors = false;
+  
     // Validation
     if (!formData.courseName.trim()) {
-      newErrors.courseName = "Course name is required";
+      toast.error("Course name is required");
+      hasErrors = true;
     }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  
+    if (hasErrors) {
       return;
     }
-
+  
     try {
       // POST request to create a new course
       const response = await axios.post("http://localhost:4000/course/newCourse", {
         name: formData.courseName,
       });
-
-      setSuccessMessage("Course created successfully");
+  
+      toast.success("Course created successfully");
       setFormData({ courseName: "" }); // Clear the input field
     } catch (error) {
       if (error.response) {
         // Server returned a specific error
-        setErrors({ courseName: error.response.data.error });
+        toast.error(error.response.data.error);
       } else {
         console.error("Error creating course:", error);
-        setErrors({ courseName: "An error occurred while creating the course" });
+        toast.error("An error occurred while creating the course");
       }
     }
   };
-
+  
   return (
     <div className="flex justify-center items-center h-400">
       <div className="w-3/4 max-w-4xl bg-white rounded-md shadow p-6">
@@ -73,23 +75,18 @@ const NewCourse = () => {
                 className="w-full px-3 py-2 outline-none"
               />
             </div>
-            {errors.courseName && (
-              <span className="text-red-500 text-sm">{errors.courseName}</span>
-            )}
           </div>
-
           <div className="text-right">
             <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
               Create Course
             </button>
           </div>
-          {successMessage && (
-            <div className="text-gray-700 text-center mt-4">{successMessage}</div>
-          )}
         </form>
       </div>
+      <ToastContainer/>
     </div>
   );
+  
 };
 
 export default NewCourse;

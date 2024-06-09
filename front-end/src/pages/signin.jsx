@@ -25,14 +25,8 @@ const SignIn = () => {
       });
 
       const accessToken = response.data.accessToken; // Get token from backend
-
-      if (rememberMe) {
-        localStorage.setItem('accessToken', accessToken);
-      } else {
-        sessionStorage.setItem('accessToken', accessToken);
-      }
       
-      login();
+      login(accessToken, rememberMe); // Pass token and rememberMe to login function
       navigate('/dashboard'); // Navigate to dashboard on success
     } catch (error) {
       setError(error.response?.data?.message || 'Error signing in');

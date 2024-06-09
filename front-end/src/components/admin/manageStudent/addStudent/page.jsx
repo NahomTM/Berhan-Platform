@@ -16,6 +16,8 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import { QRCodeCanvas } from "qrcode.react";
 import ReactDOM from "react-dom/client";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddStudent = () => {
   const [formData, setFormData] = useState({
@@ -83,63 +85,74 @@ const AddStudent = () => {
     e.preventDefault();
     let newErrors = {};
 
-    if (!formData.fName.trim()) {
-      newErrors.fName = "First Name is required";
-    } else if (!/^[a-zA-Z]+$/.test(formData.fName.trim())) {
-      newErrors.fName = "First Name must contain only letters";
+    // Check if any required field is empty
+    const requiredFields = ['fName', 'lName', 'email', 'phone', 'dob', 'role', 'address'];
+    const isEmptyField = requiredFields.some(field => !formData[field].trim() || (field === 'role' && formData[field] === 'Select'));
+
+    if (isEmptyField) {
+        toast.error("All fields are required");
+        return;
     }
 
-    if (!formData.lName.trim()) {
-      newErrors.lName = "Last Name is required";
-    } else if (!/^[a-zA-Z]+$/.test(formData.lName.trim())) {
-      newErrors.lName = "Last Name must contain only letters";
+    // Individual validation checks
+    if (!/^[a-zA-Z]+$/.test(formData.fName.trim())) {
+        toast.error("First Name must contain only letters");
+        return;
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(formData.email.trim())) {
-      newErrors.email = "Invalid email address";
+    if (formData.mName && !/^[a-zA-Z]*$/.test(formData.mName.trim())) {
+        toast.error("Middle Name must contain only letters (if provided)");
+        return;
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone Number is required";
-    } else if (!/^\+251\d{9}$/.test(formData.phone.trim())) {
-      newErrors.phone = "Invalid phone number format";
+    if (!/^[a-zA-Z]+$/.test(formData.lName.trim())) {
+        toast.error("Last Name must contain only letters");
+        return;
     }
 
-    if (!formData.dob.trim()) {
-      newErrors.dob = "Date of Birth is required";
-    } else {
-      const today = new Date();
-      const dobDate = new Date(formData.dob);
-      if (dobDate >= today) {
-        newErrors.dob = "Date of Birth must be in the past";
-      }
+    if (!validateEmail(formData.email.trim())) {
+        toast.error("Invalid email address");
+        return;
     }
 
-    setErrors(newErrors);
+    if (!/^\+251\d{9}$/.test(formData.phone.trim())) {
+        toast.error("Invalid phone number format");
+        return;
+    }
 
-    if (Object.keys(newErrors).length === 0) {
-      try {
+    const today = new Date();
+    const dobDate = new Date(formData.dob);
+    if (dobDate >= today) {
+        toast.error("Date of Birth must be in the past");
+        return;
+    }
+
+    if (!formData.address.trim()) {
+        toast.error("Address is required");
+        return;
+    }
+
+    // If all validations pass, submit the form
+    try {
         const response = await axios.post(
-          "http://localhost:4000/student/addStudent",
-          {
-            ...formData,
-            selectedCourses,
-          }
+            "http://localhost:4000/student/addStudent",
+            {
+                ...formData,
+                selectedCourses,
+            }
         );
 
         if (response.data) {
-          const fullName = `${formData.fName} ${formData.mName} ${formData.lName}`;
-          const qrCodeValue =`${fullName}|${formData.gender}|${formData.dob}|${formData.email}|${formData.phone}|${formData.address}`;
-          await downloadPDF(formData, qrCodeValue);
+            const fullName = `${formData.fName} ${formData.mName} ${formData.lName}`;
+            const qrCodeValue = `${fullName}|${formData.gender}|${formData.dob}|${formData.email}|${formData.phone}|${formData.address}`;
+            await downloadPDF(formData, qrCodeValue);
         }
-      } catch (error) {
+    } catch (error) {
         console.error("Error submitting form:", error);
-        setSubmitError("An error occurred while submitting the form.");
-      }
+        toast.error("An error occurred while submitting the form.");
     }
-  };
+};
+
 
   const downloadPDF = async (formData, qrCodeValue) => {
     const tempDiv = document.createElement("div");
@@ -237,9 +250,6 @@ const AddStudent = () => {
                       onChange={handleChange}
                     />
                   </div>
-                  {errors.fName && (
-                    <div className="text-red-500 text-sm">{errors.fName}</div>
-                  )}
                 </div>
                 <div className="flex-col ml-12">
                   <div className="text-md font-semibold text-gray-900 mb-2">
@@ -274,9 +284,6 @@ const AddStudent = () => {
                       onChange={handleChange}
                     />
                   </div>
-                  {errors.lName && (
-                    <div className="text-red-500 text-sm">{errors.lName}</div>
-                  )}
                 </div>
                 <div className="flex ml-12">
                   <div className="flex-col">
@@ -317,9 +324,6 @@ const AddStudent = () => {
                         name="dob"
                       />
                     </div>
-                    {errors.dob && (
-                      <div className="text-red-500 text-sm">{errors.dob}</div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -368,9 +372,6 @@ const AddStudent = () => {
                       onChange={handleChange}
                     />
                   </div>
-                  {errors.email && (
-                    <div className="text-red-500 text-sm">{errors.email}</div>
-                  )}
                 </div>
                 <div className="flex-col ml-12">
                   <div className="text-md font-semibold text-gray-900 mb-2">
@@ -387,9 +388,6 @@ const AddStudent = () => {
                       onChange={handleChange}
                     />
                   </div>
-                  {errors.phone && (
-                    <div className="text-red-500 text-sm">{errors.phone}</div>
-                  )}
                 </div>
               </div>
               <div className="flex-col">
@@ -465,8 +463,11 @@ const AddStudent = () => {
           )}
         </div>
       )}
+      <ToastContainer />
     </div>
-  );
+    
+);
+
 };
 
 export default AddStudent;
