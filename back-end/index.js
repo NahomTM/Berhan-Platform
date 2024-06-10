@@ -19,17 +19,15 @@ const result = require('./routes/result')
 const user = require('./routes/user')
 const room = require('./routes/room')
 const document = require('./routes/document')
+const forgotPassword = require('./routes/forgotPassword') 
 const deleteUserById = require('./controllers/delete')
 
 const app = express();
 const port = 4000;
 
-const corsOptions = {
-  origin: 'http://localhost:5173'
-};
 
 // Use CORS middleware with custom options
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,6 +55,7 @@ app.use('/result', result)
 app.use('/user', user)
 app.use('/room', room)
 app.use('/document', document)
+app.use('/forgotPassword', forgotPassword)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 

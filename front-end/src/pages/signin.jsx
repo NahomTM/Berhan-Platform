@@ -1,36 +1,44 @@
-import React, { useState } from 'react';
-import { FaFacebookF, FaLinkedinIn, FaGoogle } from 'react-icons/fa';
-import { MdEmail, MdLock } from 'react-icons/md';
-import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom'; // For navigation
+import React, { useState } from "react";
+import { FaFacebookF, FaLinkedinIn, FaGoogle } from "react-icons/fa";
+import { MdEmail, MdLock } from "react-icons/md";
+import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom"; // For navigation
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const SignIn = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate(); // For navigation
   const { login } = useAuth();
 
+  const handleForget = () => {
+    navigate('/recoveryEmail')
+  }
+
   const handleSignIn = async (event) => {
     event.preventDefault(); // Prevent default form behavior
 
     try {
-      const response = await axios.post('http://localhost:4000/auth/signIn', {
+      const response = await axios.post("http://localhost:4000/auth/signIn", {
         email,
         password,
         role,
       });
 
       const accessToken = response.data.accessToken; // Get token from backend
-      
+
       login(accessToken, rememberMe); // Pass token and rememberMe to login function
-      navigate('/dashboard'); // Navigate to dashboard on success
+      navigate("/dashboard"); // Navigate to dashboard on success
     } catch (error) {
-      setError(error.response?.data?.message || 'Error signing in');
-      console.error('Error:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || "Error signing in";
+      console.error("Error:", error.response?.data || error.message);
+      toast.error(errorMessage); // Show error toast
     }
   };
 
@@ -39,12 +47,11 @@ const SignIn = () => {
       <div className="bg-white rounded-2xl shadow flex flex-r w-2/3 max-w-2xl">
         <div className="w-96 p-5">
           <div className="text-left font-bold">
-            MyApp<span className="text-orange-500">Tech</span>
+            Clarus<span className="text-orange-500">EDU</span>
           </div>
           <div className="py-10">
-            <h2 className="text-3xl font-bold text-gray-500 mb-2">Sign In</h2>
-            <div className="border-2 w-10 border-gray-900 inline-block mb-2"></div>
-            {error && <p className="text-red-500 mb-2">{error}</p>}
+            <h2 className="text-3xl font-bold text-gray-500 mb-1">Sign In</h2>
+            <div className="border w-24 border-gray-900 inline-block mb-3"></div>
             <div className="flex flex-col items-center">
               <div className="bg-white w-64 p-1 flex items-center border-2 border-gray-600 rounded-l mb-3">
                 <MdEmail className="m-1" />
@@ -91,9 +98,11 @@ const SignIn = () => {
                   />
                   Remember me
                 </label>
-                <a href="#" className="text-sm">
+                <button className="text-sm"
+                onClick={() => {handleForget()}}
+                >
                   Forgot Password
-                </a>
+                </button>
               </div>
 
               <button
@@ -108,11 +117,13 @@ const SignIn = () => {
         <div className="w-72 bg-gray-900 text-white rounded-tr-2xl rounded-br-2xl py-36 px-12">
           <h2 className="text-3xl font-bold mb-2">Welcome</h2>
           <div className="border-2 w-10 border-white inline-block mb-2"></div>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam, maiores eius! Nemo quia iure tenetur vel inventore hic fuga voluptatum ducimus.
+          <p className="text-justify">
+            Welcome to ClarusEDU, the inclusive learning platform designed to
+            empower students with visual impairment.
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

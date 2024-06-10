@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const { uploadFile, getFile, getUploads, textToSpeech, deleteUpload, uploadFileAndTextToSpeech, getAudio } = require('../controllers/fileController');
 const authenticateToken = require('../middleware/authenticateToken');
+const { updateUserProfile } = require('../controllers/profile');
 const router = express.Router();
 
 // Configure Multer to store files on disk with a unique name

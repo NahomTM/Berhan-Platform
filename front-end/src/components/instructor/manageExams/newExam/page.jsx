@@ -232,8 +232,8 @@ const MultiStepExamForm = () => {
                 />
               </div>
 
-              <div class="mb-4">
-                <label class="block text-gray-700">Exam Date</label>
+              <div className="mb-4">
+                <label className="block text-gray-700">Exam Date</label>
                 <input
                   type="date"
                   name="examDate"

@@ -25,6 +25,8 @@ import UserProfile from "./pages/profile";
 import MultiStepExamForm2 from "./components/instructor/manageExams/newExam/edit";
 import MessageComponent from "./components/messages/page";
 import ManageResult from "./components/instructor/manageResults/page";
+import ForgotPassword from "./pages/forgotPassword";
+import ChangePassword from "./pages/changePassword";
 
 const App = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -32,89 +34,133 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <SignIn />} />
+        <Route
+          path="/"
+          element={isLoggedIn ? <Navigate to="/dashboard" /> : <SignIn />}
+        />
 
-        <Route path="/dashboard" element={
-          isLoggedIn ? (
-            <ProtectedLayout onLogout={logout}>
-              <Dashboard />
-            </ProtectedLayout>
-          ) : (
-            <Navigate to="/" />
-          )
-        } />
+        <Route path="/recoveryEmail" element={<ForgotPassword />} />
+        <Route path="/resetPassword/:token" element={<ChangePassword />} />
 
-        <Route path="/manageProfile" element={
-          isLoggedIn ? (
-            <ProtectedLayout onLogout={logout}>
-              <UserProfile />
-            </ProtectedLayout>
-          ) : (
-            <Navigate to="/" />
-          )
-        } />
+        <Route
+          path="/dashboard"
+          element={
+            isLoggedIn ? (
+              <ProtectedLayout onLogout={logout}>
+                <Dashboard />
+              </ProtectedLayout>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/manageProfile"
+          element={
+            isLoggedIn ? (
+              <ProtectedLayout onLogout={logout}>
+                <UserProfile />
+              </ProtectedLayout>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
         <Route element={<AdminPrivateRoute />}>
-          <Route path="/manageEmployee" element={
-            <ProtectedLayout onLogout={logout}>
-              <ManageEmployee />
-            </ProtectedLayout>
-          } />
-          <Route path="/addNewEmployee" element={
-            <ProtectedLayout onLogout={logout}>
-              <AddEmployee />
-            </ProtectedLayout>
-          } />
-          <Route path="/manageCourse" element={
-            <ProtectedLayout onLogout={logout}>
-              <ManageCourse />
-            </ProtectedLayout>
-          } />
-          <Route path="/addNewCourse" element={
-            <ProtectedLayout onLogout={logout}>
-              <NewCourse />
-            </ProtectedLayout>
-          } />
-          <Route path="/manageStudent" element={
-            <ProtectedLayout onLogout={logout}>
-              <ManageStudent />
-            </ProtectedLayout>
-          } />
-          <Route path="/addNewStudent" element={
-            <ProtectedLayout onLogout={logout}>
-              <AddStudent />
-            </ProtectedLayout>
-          } />
+          <Route
+            path="/manageEmployee"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <ManageEmployee />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/addNewEmployee"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <AddEmployee />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/manageCourse"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <ManageCourse />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/addNewCourse"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <NewCourse />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/manageStudent"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <ManageStudent />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/addNewStudent"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <AddStudent />
+              </ProtectedLayout>
+            }
+          />
         </Route>
 
         <Route element={<InstructorPrivateRoute />}>
-          <Route path="/newUpload" element={
-            <ProtectedLayout onLogout={logout}>
-              <DocumentUploader />
-            </ProtectedLayout>
-          } />
-          <Route path="/manageUploads" element={
-            <ProtectedLayout onLogout={logout}>
-              <ManageUploads />
-            </ProtectedLayout>
-          } />
-          <Route path="/newExam" element={
-            <ProtectedLayout onLogout={logout}>
-              <MultiStepExamForm />
-            </ProtectedLayout>
-          } />
-          <Route path="/manageExam" element={
-            <ProtectedLayout onLogout={logout}>
-              <ManageExam />
-            </ProtectedLayout>
-          } />
-          <Route path="/manageResult" element={
-            <ProtectedLayout onLogout={logout}>
-              <ManageResult />
-            </ProtectedLayout>
-          } />
+          <Route
+            path="/newUpload"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <DocumentUploader />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/manageUploads"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <ManageUploads />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/newExam"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <MultiStepExamForm />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/manageExam"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <ManageExam />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/manageResult"
+            element={
+              <ProtectedLayout onLogout={logout}>
+                <ManageResult />
+              </ProtectedLayout>
+            }
+          />
         </Route>
-
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

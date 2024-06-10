@@ -3,19 +3,17 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import DefaultProfile from "../resource/defaultProfilePage.svg";
 import { MdModeEdit } from "react-icons/md";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../style/userProfile.css";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [error, setError] = useState(null);
-  const [profilePicture, setProfilePicture] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -30,33 +28,84 @@ const UserProfile = () => {
           }
         );
         setUser(response.data);
-        setProfilePicture(response.data.profilePic || "");
-        console.log("proPic: ", profilePicture);
+        setProfilePicturePreview(response.data.profilePic || null); // Set to null initially
+        // Prefill form data
+        Object.keys(response.data).forEach((key) => {
+          setValue(key, response.data[key]);
+        });
+
+        console.log("profile pic: ", profilePicturePreview);
       } catch (error) {
-        setError(
+        toast.error(
           error.response
             ? error.response.data.message
             : "Failed to load profile"
         );
-        console.log(error);
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [setValue]);
+
+  const validateFormData = (data) => {
+    const errors = {};
+
+    if (!data.firstName || !/^[A-Za-z]+$/.test(data.firstName)) {
+      errors.firstName = "First name is required and can only contain letters";
+    }
+    if (data.middleName && !/^[A-Za-z]+$/.test(data.middleName)) {
+      errors.middleName = "Middle name can only contain letters";
+    }
+    if (!data.lastName || !/^[A-Za-z]+$/.test(data.lastName)) {
+      errors.lastName = "Last name is required and can only contain letters";
+    }
+    if (!data.dateOfBirth || new Date(data.dateOfBirth) > new Date()) {
+      errors.dateOfBirth =
+        "Date of birth is required and cannot be in the future";
+    }
+    if (!data.email || !/^\S+@\S+$/.test(data.email)) {
+      errors.email = "Invalid email address";
+    }
+    if (!data.phoneNumber || !/^\+251\d{9}$/.test(data.phoneNumber)) {
+      errors.phoneNumber =
+        "Invalid phone number (use +251 followed by 9 digits)";
+    }
+    if (!data.address) {
+      errors.address = "Address is required";
+    }
+
+    return errors;
+  };
 
   const onSubmit = async (data) => {
+    const validationErrors = validateFormData(data);
+
+    if (Object.keys(validationErrors).length > 0) {
+      Object.values(validationErrors).forEach((error) => {
+        toast.error(error);
+      });
+      return;
+    }
+
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.put("http://localhost:4000/profile/updateProfile", data, {
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => formData.append(key, data[key]));
+      if (profilePicture) {
+        formData.append("profilePicture", profilePicture);
+      }
+
+      await axios.put("http://localhost:4000/profile/updateProfile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
       setUser(data);
       setEditMode(false);
+      toast.success("Profile updated successfully");
     } catch (error) {
-      setError(
+      toast.error(
         error.response
           ? error.response.data.message
           : "Failed to update profile"
@@ -67,28 +116,25 @@ const UserProfile = () => {
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setProfilePicture(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setProfilePicture(file);
+      setProfilePicturePreview(URL.createObjectURL(file)); // Use URL.createObjectURL to create a preview URL
     }
   };
 
   return (
     <div className="mt-10 mx-10 w-1000 mb-3">
+      <ToastContainer />
       <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900">
         User Profile
       </h1>
-      {error && <p className="text-red-500">{error}</p>}
       {user && (
         <div className="flex flex-col lg:flex-row bg-white p-6 rounded-lg shadow-lg border border-gray-200">
           <div className="flex flex-col items-center lg:w-1/3 relative">
             <div className="profile-picture-container">
               <img
-                src={profilePicture || ""}
+                src={profilePicturePreview || DefaultProfile} // Use profilePicturePreview instead of profilePicture
                 alt="Profile"
-                className="w-48 h-48 mb-4 object-cover rounded-full"
+                className="w-48 h-48 mb-4 object-cover rounded-full border-2"
               />
               {editMode && (
                 <label className="profile-picture-overlay flex">
@@ -108,7 +154,9 @@ const UserProfile = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="lg:w-2/3 lg:ml-8">
             <div className="flex-col">
               <div>
-                <h2 className="text-xl font-bold mb-4 text-gray-700">User Information</h2>
+                <h2 className="text-xl font-bold mb-4 text-gray-700">
+                  User Information
+                </h2>
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div className="flex flex-col">
                     <label
@@ -120,19 +168,10 @@ const UserProfile = () => {
                     <input
                       type="text"
                       id="firstName"
-                      defaultValue={user.firstName}
-                      {...register("firstName", {
-                        required: true,
-                        pattern: /^[A-Za-z]+$/,
-                      })}
+                      {...register("firstName")}
                       disabled={!editMode}
                       className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     />
-                    {errors.firstName && (
-                      <p className="text-red-500">
-                        First name is required and can only contain letters
-                      </p>
-                    )}
                   </div>
                   <div className="flex flex-col">
                     <label
@@ -144,16 +183,10 @@ const UserProfile = () => {
                     <input
                       type="text"
                       id="middleName"
-                      defaultValue={user.middleName}
-                      {...register("middleName", { pattern: /^[A-Za-z]+$/ })}
+                      {...register("middleName")}
                       disabled={!editMode}
                       className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     />
-                    {errors.middleName && (
-                      <p className="text-red-500">
-                        Middle name can only contain letters
-                      </p>
-                    )}
                   </div>
                   <div className="flex flex-col">
                     <label
@@ -165,19 +198,10 @@ const UserProfile = () => {
                     <input
                       type="text"
                       id="lastName"
-                      defaultValue={user.lastName}
-                      {...register("lastName", {
-                        required: true,
-                        pattern: /^[A-Za-z]+$/,
-                      })}
+                      {...register("lastName")}
                       disabled={!editMode}
                       className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     />
-                    {errors.lastName && (
-                      <p className="text-red-500">
-                        Last name is required and can only contain letters
-                      </p>
-                    )}
                   </div>
                   <div className="flex flex-col">
                     <label
@@ -189,25 +213,17 @@ const UserProfile = () => {
                     <input
                       type="date"
                       id="dateOfBirth"
-                      defaultValue={user.dateOfBirth}
-                      {...register("dateOfBirth", {
-                        required: true,
-                        max: new Date().toISOString().split("T")[0],
-                      })}
+                      {...register("dateOfBirth")}
                       disabled={!editMode}
                       className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     />
-                    {errors.dateOfBirth && (
-                      <p className="text-red-500">
-                        Date of birth is required and cannot be in the future
-                      </p>
-                    )}
                   </div>
                 </div>
-                {/* Add Gender field */}
               </div>
               <div>
-                <h2 className="text-xl font-bold mb-4 mt-4 text-gray-700">Contact Information</h2>
+                <h2 className="text-xl font-bold mb-4 mt-4 text-gray-700">
+                  Contact Information
+                </h2>
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div className="flex flex-col">
                     <label
@@ -219,17 +235,10 @@ const UserProfile = () => {
                     <input
                       type="email"
                       id="email"
-                      defaultValue={user.email}
-                      {...register("email", {
-                        required: true,
-                        pattern: /^\S+@\S+$/,
-                      })}
+                      {...register("email")}
                       disabled={!editMode}
                       className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     />
-                    {errors.email && (
-                      <p className="text-red-500">Invalid email address</p>
-                    )}
                   </div>
                   <div className="flex flex-col">
                     <label
@@ -241,24 +250,17 @@ const UserProfile = () => {
                     <input
                       type="tel"
                       id="phoneNumber"
-                      defaultValue={user.phoneNumber}
-                      {...register("phoneNumber", {
-                        required: true,
-                        pattern: /^\+251\d{9}$/,
-                      })}
+                      {...register("phoneNumber")}
                       disabled={!editMode}
                       className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                     />
-                    {errors.phoneNumber && (
-                      <p className="text-red-500">
-                        Invalid phone number (10 digits only)
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-bold mb-4 mt-4 text-gray-700">Address</h2>
+                <h2 className="text-xl font-bold mb-4 mt-4 text-gray-700">
+                  Address
+                </h2>
                 <div className="flex flex-col">
                   <label
                     htmlFor="address"
@@ -269,14 +271,10 @@ const UserProfile = () => {
                   <input
                     type="text"
                     id="address"
-                    defaultValue={user.address}
-                    {...register("address", { required: true })}
+                    {...register("address")}
                     disabled={!editMode}
                     className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-700 focus:border-gray-800"
                   />
-                  {errors.address && (
-                    <p className="text-red-500">Address is required</p>
-                  )}
                 </div>
               </div>
             </div>

@@ -2,6 +2,9 @@ const PrismaClient = require("@prisma/client").PrismaClient;
 const prisma = new PrismaClient();
 
 const addResult = async (req, res) => {
+
+  const studentId = req.user.id
+
   let { result, examId } = req.body;
 
   console.log("result: ", result);
@@ -9,7 +12,6 @@ const addResult = async (req, res) => {
 
   // Convert inputs to integers
   result = parseInt(result, 10);
-  studentId = 3;
   const examCode = examId.toString();
 
   // Validate the converted inputs
@@ -159,8 +161,9 @@ const publishResult = async (req, res) => {
 };
 
 const fetchedPublished = async (req, res) => {
-  const {studentId} = req.body
-
+  // const {studentId} = req.body
+  console.log("Calling this function");
+  const studentId = req.user.id
   const isPublished = true
 
   try {
@@ -183,6 +186,8 @@ const fetchedPublished = async (req, res) => {
       examName: result.exam.examName,
       result: result.result,
     }));
+
+    console.log(formattedResults);
 
     return res.status(200).json(formattedResults);
   } catch (error) {
